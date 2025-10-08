@@ -55,7 +55,7 @@ async def transcribe_youtube(url: str = Form(...)):
 
         output_template = str(UPLOAD_DIR / f"{video_id}.%(ext)s")
 
-        # yt-dlp로 오디오 다운로드
+        # yt-dlp로 오디오 다운로드 (YouTube 차단 회피 옵션 추가)
         yt_command = [
             "yt-dlp",
             "-f", "bestaudio/best",
@@ -64,6 +64,11 @@ async def transcribe_youtube(url: str = Form(...)):
             "--audio-quality", "0",
             "-o", output_template,
             "--no-playlist",
+            # YouTube 차단 회피 옵션
+            "--cookies-from-browser", "chrome",  # Chrome 브라우저 쿠키 사용
+            "--user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "--extractor-args", "youtube:player_client=web,mweb",
+            "--no-check-certificates",
             url
         ]
 

@@ -26,4 +26,4 @@ mkdir -p ../data/outputs
 
 # FastAPI 서버 시작
 echo "✅ 서버 시작 (http://localhost:8000)"
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --reload-dir . --reload-exclude 'venv/*' --host 0.0.0.0 --port 8000
