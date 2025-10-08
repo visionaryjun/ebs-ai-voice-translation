@@ -57,10 +57,11 @@ async def transcribe_youtube(url: str = Form(...)):
         video_output = str(UPLOAD_DIR / f"{video_id}.mp4")
         audio_output = str(UPLOAD_DIR / f"{video_id}.wav")
 
-        # Step 1: yt-dlp로 비디오 다운로드
+        # Step 1: yt-dlp로 비디오 다운로드 (오디오 포함 보장)
         yt_command = [
             "yt-dlp",
-            "-f", "best[height<=720]",  # 720p 이하로 제한 (빠른 다운로드)
+            "-f", "bestvideo[height<=720]+bestaudio/best[height<=720]",  # 비디오+오디오 결합
+            "--merge-output-format", "mp4",  # mp4로 병합
             "-o", video_output,
             "--no-playlist",
             "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -100,7 +101,34 @@ async def transcribe_youtube(url: str = Form(...)):
             video_output = possible_files[0]
             logger.info(f"Found video file: {video_output}")
 
-        # Step 2: FFmpeg로 오디오 추출 및 WAV 변환
+        # Step 2: 오디오 스트림 확인
+        logger.info("Checking for audio stream...")
+        probe_command = [
+            "ffprobe",
+            "-v", "error",
+            "-select_streams", "a:0",
+            "-show_entries", "stream=codec_type",
+            "-of", "default=noprint_wrappers=1:nokey=1",
+            video_output
+        ]
+
+        probe_result = subprocess.run(
+            probe_command,
+            capture_output=True,
+            text=True,
+            check=False
+        )
+
+        if not probe_result.stdout.strip():
+            logger.error(f"No audio stream found in video: {video_output}")
+            raise HTTPException(
+                status_code=400,
+                detail="이 영상에는 오디오가 없습니다. 오디오가 포함된 영상을 선택해주세요."
+            )
+
+        logger.info("Audio stream detected")
+
+        # Step 3: FFmpeg로 오디오 추출 및 WAV 변환
         logger.info("Extracting audio with FFmpeg...")
         ffmpeg_command = [
             "ffmpeg", "-y",
@@ -122,9 +150,15 @@ async def transcribe_youtube(url: str = Form(...)):
 
         if ffmpeg_result.returncode != 0:
             logger.error(f"FFmpeg error: {ffmpeg_result.stderr}")
+            # 오디오 관련 에러인지 확인
+            if "does not contain any stream" in ffmpeg_result.stderr:
+                raise HTTPException(
+                    status_code=400,
+                    detail="오디오 스트림을 찾을 수 없습니다. 다른 영상을 시도해주세요."
+                )
             raise HTTPException(
                 status_code=500,
-                detail=f"Audio extraction failed: {ffmpeg_result.stderr}"
+                detail=f"오디오 추출 실패: FFmpeg 오류가 발생했습니다."
             )
 
         logger.info("Audio extraction completed")
