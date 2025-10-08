@@ -60,12 +60,10 @@ async def transcribe_youtube(url: str = Form(...)):
         # Step 1: yt-dlp로 비디오 다운로드 (오디오 포함 보장)
         yt_command = [
             "yt-dlp",
-            "-f", "bestvideo[height<=720]+bestaudio/best[height<=720]",  # 비디오+오디오 결합
-            "--merge-output-format", "mp4",  # mp4로 병합
+            # 포맷 지정 없이 기본값 사용 (자동으로 최적 병합)
             "-o", video_output,
             "--no-playlist",
-            "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            "--extractor-args", "youtube:player_client=android",
+            "--merge-output-format", "mp4",
             url
         ]
 
