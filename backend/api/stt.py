@@ -61,6 +61,7 @@ async def transcribe_youtube(url: str = Form(...)):
         yt_command = [
             "yt-dlp",
             # 포맷 지정 없이 기본값 사용 (자동으로 최적 병합)
+            "--force-overwrites",  # 기존 파일 덮어쓰기
             "-o", video_output,
             "--no-playlist",
             "--merge-output-format", "mp4",
