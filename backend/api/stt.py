@@ -58,15 +58,14 @@ async def transcribe_youtube(url: str = Form(...)):
         audio_output = str(UPLOAD_DIR / f"{video_id}.wav")
 
         # Step 1: yt-dlp로 비디오 다운로드 (오디오 포함 보장)
+        # 터미널 테스트에서 검증된 명령어 사용
         yt_command = [
             "yt-dlp",
-            # YouTube 우회 옵션 (android 클라이언트 사용)
             "--extractor-args", "youtube:player_client=android",
-            # 포맷 18: 360p MP4 with audio (오디오+비디오 병합된 단일 파일)
-            "-f", "18/best[ext=mp4]",
+            "--no-playlist",
+            "--merge-output-format", "mp4",
             "--force-overwrites",  # 기존 파일 덮어쓰기
             "-o", video_output,
-            "--no-playlist",
             url
         ]
 
