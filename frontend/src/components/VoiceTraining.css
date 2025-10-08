@@ -1,0 +1,139 @@
+.voice-training {
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.progress-section {
+  margin: 25px 0;
+}
+
+.progress-section h3 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.recording-section {
+  background: #f8f9fa;
+  padding: 30px;
+  border-radius: 10px;
+  margin: 20px 0;
+}
+
+.sentence-display {
+  background: white;
+  padding: 25px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.sentence-number {
+  display: block;
+  color: #667eea;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.sentence-text {
+  font-size: 20px;
+  color: #333;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+.recording-controls {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.btn-record {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  font-size: 18px;
+  padding: 15px 40px;
+}
+
+.btn-stop {
+  background: linear-gradient(135deg, #f093fb, #f5576c);
+  font-size: 18px;
+  padding: 15px 40px;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.navigation-controls {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.btn-prev, .btn-next {
+  background-color: #6c757d;
+}
+
+.btn-prev:hover, .btn-next:hover {
+  background-color: #5a6268;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 25px 0;
+  flex-wrap: wrap;
+}
+
+.btn-train {
+  background: linear-gradient(135deg, #11998e, #38ef7d);
+}
+
+.btn-train:hover {
+  background: linear-gradient(135deg, #0d8478, #2dd36f);
+}
+
+.btn-reset {
+  background: linear-gradient(135deg, #ee0979, #ff6a00);
+}
+
+.btn-reset:hover {
+  background: linear-gradient(135deg, #d10869, #e65f00);
+}
+
+.info-box {
+  background: #e7f3ff;
+  border-left: 4px solid #2196F3;
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 25px;
+}
+
+.info-box h4 {
+  color: #2196F3;
+  margin-bottom: 15px;
+}
+
+.info-box ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.info-box li {
+  padding: 8px 0;
+  color: #555;
+}
+
+.info-box li:before {
+  content: "✓ ";
+  color: #2196F3;
+  font-weight: bold;
+  margin-right: 8px;
+}

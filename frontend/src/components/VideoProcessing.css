@@ -1,0 +1,156 @@
+.video-processing {
+  animation: fadeIn 0.5s;
+}
+
+.language-selector {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.language-selector label {
+  font-weight: bold;
+  color: #333;
+}
+
+.language-selector select {
+  flex: 1;
+  padding: 10px 15px;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  background: white;
+}
+
+.input-section {
+  margin: 30px 0;
+  padding: 25px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.input-section h3 {
+  color: #667eea;
+  margin-bottom: 15px;
+}
+
+.youtube-input {
+  display: flex;
+  gap: 10px;
+}
+
+.youtube-input input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.youtube-input input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.file-input {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.file-input input[type="file"] {
+  flex: 1;
+  padding: 10px;
+  border: 2px dashed #667eea;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.file-name {
+  margin-top: 10px;
+  color: #666;
+  font-style: italic;
+}
+
+.btn-process {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  white-space: nowrap;
+}
+
+.divider {
+  text-align: center;
+  color: #999;
+  font-weight: bold;
+  margin: 30px 0;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background: #ddd;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+.processing-status {
+  text-align: center;
+  padding: 40px;
+  background: #f0f4ff;
+  border-radius: 10px;
+  margin: 25px 0;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  margin: 20px auto;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.result-section {
+  margin: 25px 0;
+  padding: 20px;
+  background: white;
+  border-left: 4px solid #667eea;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.result-section h3 {
+  color: #667eea;
+  margin-bottom: 15px;
+}
+
+.text-box {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  line-height: 1.8;
+  color: #333;
+  max-height: 300px;
+  overflow-y: auto;
+}
