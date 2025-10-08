@@ -5,6 +5,7 @@ import whisper
 import os
 import re
 import logging
+import glob
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
@@ -53,26 +54,21 @@ async def transcribe_youtube(url: str = Form(...)):
         video_id = extract_video_id(url)
         logger.info(f"Extracted video ID: {video_id}")
 
-        output_template = str(UPLOAD_DIR / f"{video_id}.%(ext)s")
+        video_output = str(UPLOAD_DIR / f"{video_id}.mp4")
+        audio_output = str(UPLOAD_DIR / f"{video_id}.wav")
 
-        # yt-dlp로 오디오 다운로드 (YouTube 차단 회피 옵션 추가)
+        # Step 1: yt-dlp로 비디오 다운로드
         yt_command = [
             "yt-dlp",
-            "-f", "bestaudio/best",
-            "--extract-audio",
-            "--audio-format", "wav",
-            "--audio-quality", "0",
-            "-o", output_template,
+            "-f", "best[height<=720]",  # 720p 이하로 제한 (빠른 다운로드)
+            "-o", video_output,
             "--no-playlist",
-            # YouTube 차단 회피 옵션
-            "--cookies-from-browser", "chrome",  # Chrome 브라우저 쿠키 사용
-            "--user-agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "--extractor-args", "youtube:player_client=web,mweb",
-            "--no-check-certificates",
+            "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "--extractor-args", "youtube:player_client=android",
             url
         ]
 
-        logger.info(f"Running yt-dlp command: {' '.join(yt_command)}")
+        logger.info(f"Downloading video: {' '.join(yt_command)}")
         result = subprocess.run(
             yt_command,
             capture_output=True,
@@ -87,24 +83,65 @@ async def transcribe_youtube(url: str = Form(...)):
                 detail=f"YouTube download failed: {result.stderr}"
             )
 
-        logger.info("YouTube download completed")
+        logger.info("Video download completed")
 
-        # 생성된 오디오 파일 찾기
-        audio_file = UPLOAD_DIR / f"{video_id}.wav"
+        # 다운로드된 파일 확인
+        if not os.path.exists(video_output):
+            # glob으로 실제 파일 찾기
+            possible_files = glob.glob(str(UPLOAD_DIR / f"{video_id}.*"))
+            logger.info(f"Looking for files: {possible_files}")
 
-        if not audio_file.exists():
-            logger.error(f"Audio file not found: {audio_file}")
+            if not possible_files:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Video file not found after download"
+                )
+
+            video_output = possible_files[0]
+            logger.info(f"Found video file: {video_output}")
+
+        # Step 2: FFmpeg로 오디오 추출 및 WAV 변환
+        logger.info("Extracting audio with FFmpeg...")
+        ffmpeg_command = [
+            "ffmpeg", "-y",
+            "-i", video_output,
+            "-vn",  # 비디오 제거
+            "-acodec", "pcm_s16le",  # WAV 코덱
+            "-ar", "16000",  # 16kHz 샘플레이트 (Whisper 최적)
+            "-ac", "1",  # 모노
+            audio_output
+        ]
+
+        logger.info(f"Running FFmpeg: {' '.join(ffmpeg_command)}")
+        ffmpeg_result = subprocess.run(
+            ffmpeg_command,
+            capture_output=True,
+            text=True,
+            check=False
+        )
+
+        if ffmpeg_result.returncode != 0:
+            logger.error(f"FFmpeg error: {ffmpeg_result.stderr}")
             raise HTTPException(
                 status_code=500,
-                detail=f"Audio file was not created: {audio_file}"
+                detail=f"Audio extraction failed: {ffmpeg_result.stderr}"
             )
 
-        logger.info(f"Audio file found: {audio_file}")
+        logger.info("Audio extraction completed")
+
+        # 오디오 파일 확인
+        if not os.path.exists(audio_output):
+            raise HTTPException(
+                status_code=500,
+                detail=f"Audio file was not created: {audio_output}"
+            )
+
+        logger.info(f"Audio file ready: {audio_output}")
 
         # Whisper로 음성 인식
         logger.info("Starting transcription...")
         model = get_whisper_model()
-        transcription_result = model.transcribe(str(audio_file))
+        transcription_result = model.transcribe(audio_output)
 
         logger.info("Transcription completed")
 
@@ -114,7 +151,7 @@ async def transcribe_youtube(url: str = Form(...)):
             "text": transcription_result["text"],
             "segments": transcription_result["segments"],
             "language": transcription_result["language"],
-            "audio_file": str(audio_file)
+            "audio_file": audio_output
         }
     except HTTPException:
         raise
