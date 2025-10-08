@@ -24,6 +24,9 @@ mkdir -p ../data/voice_models
 mkdir -p ../data/uploads
 mkdir -p ../data/outputs
 
+# Coqui TTS 사용 약관 자동 동의
+export COQUI_TOS_AGREED=1
+
 # FastAPI 서버 시작
 echo "✅ 서버 시작 (http://localhost:8000)"
 uvicorn main:app --reload --reload-dir . --reload-exclude 'venv/*' --host 0.0.0.0 --port 8000
