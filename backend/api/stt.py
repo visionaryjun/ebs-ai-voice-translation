@@ -77,8 +77,14 @@ async def transcribe_youtube(url: str = Form(...)):
             check=False
         )
 
+        # stdout과 stderr 모두 로그에 출력
+        if result.stdout:
+            logger.info(f"yt-dlp stdout: {result.stdout}")
+        if result.stderr:
+            logger.info(f"yt-dlp stderr: {result.stderr}")
+
         if result.returncode != 0:
-            logger.error(f"yt-dlp error: {result.stderr}")
+            logger.error(f"yt-dlp failed with return code {result.returncode}")
             raise HTTPException(
                 status_code=500,
                 detail=f"YouTube download failed: {result.stderr}"
@@ -100,6 +106,16 @@ async def transcribe_youtube(url: str = Form(...)):
 
             video_output = possible_files[0]
             logger.info(f"Found video file: {video_output}")
+
+        # 파일 크기 검증 (최소 1MB 이상)
+        file_size = os.path.getsize(video_output)
+        logger.info(f"Downloaded file size: {file_size / 1024 / 1024:.2f} MB")
+        if file_size < 1024 * 1024:  # 1MB 미만
+            logger.error(f"File too small ({file_size} bytes), likely corrupted")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Downloaded file is too small ({file_size} bytes), likely corrupted or incomplete"
+            )
 
         # Step 2: 오디오 스트림 확인
         logger.info("Checking for audio stream...")
